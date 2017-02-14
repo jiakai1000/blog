@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>在Nginx的worker进程fork之后 | JiaKai&#39;s Blog</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="项目中遇到一个问题：CPU占用在某种条件下会到接近100%，当然肯定不是业务满载，查吧。
+先看日志中的关键部分。出问题的fd销毁时刻：2014/10/31 21:12:10 [debug] 23574#23577: epoll: fd:28 ev:0019 d:00007F16ED6981C02014/10/31 21:12:10 [debug] 23574#23577: epoll_wait()">
+<meta property="og:type" content="article">
+<meta property="og:title" content="在Nginx的worker进程fork之后">
+<meta property="og:url" content="http://blog.jiakai.me/2014/11/15/在Nginx的worker进程fork之后/index.html">
+<meta property="og:site_name" content="JiaKai's Blog">
+<meta property="og:description" content="项目中遇到一个问题：CPU占用在某种条件下会到接近100%，当然肯定不是业务满载，查吧。
+先看日志中的关键部分。出问题的fd销毁时刻：2014/10/31 21:12:10 [debug] 23574#23577: epoll: fd:28 ev:0019 d:00007F16ED6981C02014/10/31 21:12:10 [debug] 23574#23577: epoll_wait()">
+<meta property="og:updated_time" content="2017-02-14T05:47:17.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="在Nginx的worker进程fork之后">
+<meta name="twitter:description" content="项目中遇到一个问题：CPU占用在某种条件下会到接近100%，当然肯定不是业务满载，查吧。
+先看日志中的关键部分。出问题的fd销毁时刻：2014/10/31 21:12:10 [debug] 23574#23577: epoll: fd:28 ev:0019 d:00007F16ED6981C02014/10/31 21:12:10 [debug] 23574#23577: epoll_wait()">
+  
+    <link rel="alternate" href="/atom.xml" title="JiaKai&#39;s Blog" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  <link rel="stylesheet" href="/css/style.css">
+  
+
+</head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">JiaKai&#39;s Blog</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" results="0" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://blog.jiakai.me"></form>
+      </div>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-在Nginx的worker进程fork之后" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2014/11/15/在Nginx的worker进程fork之后/" class="article-date">
+  <time datetime="2014-11-14T18:22:45.000Z" itemprop="datePublished">2014-11-15</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      在Nginx的worker进程fork之后
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>项目中遇到一个问题：CPU占用在某种条件下会到接近100%，当然肯定不是业务满载，查吧。</p>
+<p>先看日志中的关键部分。<br>出问题的fd销毁时刻：<br>2014/10/31 21:12:10 [debug] 23574#23577: epoll: fd:28 ev:0019 d:00007F16ED6981C0<br>2014/10/31 21:12:10 [debug] 23574#23577: epoll_wait() error on fd:28 ev:0019<br>2014/10/31 21:12:10 [debug] 23574#23577: <em>2 recv: fd:28 -1 of 146<br>2014/10/31 21:12:10 [info ] 23574#23577: </em>2 recv() failed (104: Connection reset by peer), client: 192.168.147.75, server: 0.0.0.0:1935<br>2014/10/31 21:12:10 [debug] 23574#23577: <em>2 ngx_rtmp_put_session<br>2014/10/31 21:12:10 [debug] 23574#23577: </em>2 finalize session<br>该fd出问题时刻：<br>2014/11/04 09:47:50 [debug] 23574#23577: epoll: stale event 00007F16ED6981C0<br>2014/11/04 09:47:50 [debug] 23574#23577: process events delta: 0<br>2014/11/04 09:47:50 [debug] 23574#23577: accept mutex lock failed<br>2014/11/04 09:47:50 [debug] 23574#23577: epoll timer: 10<br>2014/11/04 09:47:50 [debug] 23574#23577: epoll: stale event 00007F16ED6981C0<br>2014/11/04 09:47:50 [debug] 23574#23577: process events delta: 0<br>2014/11/04 09:47:50 [debug] 23574#23577: accept mutex lock failed<br>2014/11/04 09:47:50 [debug] 23574#23577: epoll timer: 10<br>就是这个stale event导致epoll_wait马上返回，从而占用这么多CPU。</p>
+<p>为了验证该问题，先看一个测试demo：<br><figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div><div class="line">75</div><div class="line">76</div><div class="line">77</div><div class="line">78</div><div class="line">79</div><div class="line">80</div><div class="line">81</div><div class="line">82</div><div class="line">83</div><div class="line">84</div><div class="line">85</div><div class="line">86</div><div class="line">87</div><div class="line">88</div><div class="line">89</div><div class="line">90</div><div class="line">91</div><div class="line">92</div><div class="line">93</div><div class="line">94</div><div class="line">95</div><div class="line">96</div><div class="line">97</div><div class="line">98</div><div class="line">99</div><div class="line">100</div><div class="line">101</div><div class="line">102</div><div class="line">103</div><div class="line">104</div><div class="line">105</div><div class="line">106</div><div class="line">107</div><div class="line">108</div><div class="line">109</div><div class="line">110</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">fork_server_routine</span><span class="params">()</span></span></div><div class="line">&#123;</div><div class="line">    <span class="keyword">int</span> sock = socket(PF_INET, SOCK_STREAM, <span class="number">0</span>);</div><div class="line">    <span class="keyword">if</span> (sock &amp;lt; <span class="number">0</span>) <span class="keyword">return</span>;</div><div class="line">    <span class="keyword">struct</span> sockaddr_in addr = &#123;<span class="number">0</span>&#125;;</div><div class="line">    addr.sin_family = PF_INET;</div><div class="line">    addr.sin_port = htons(<span class="number">9999</span>);</div><div class="line">    <span class="keyword">int</span> rc = <span class="number">1</span>;</div><div class="line">    rc = setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &amp;amp;rc , <span class="keyword">sizeof</span>(<span class="keyword">int</span>));</div><div class="line">    <span class="keyword">if</span> (rc &amp;lt; <span class="number">0</span>) &#123;</div><div class="line">        perror(<span class="string">"setsockopt"</span>);</div><div class="line">        <span class="keyword">return</span>;</div><div class="line">    &#125;</div><div class="line">    rc = bind(sock, (<span class="keyword">struct</span> sockaddr *)&amp;amp;addr, <span class="keyword">sizeof</span>(addr));</div><div class="line">    <span class="keyword">if</span> (rc &amp;lt; <span class="number">0</span>) &#123;</div><div class="line">        perror(<span class="string">"bind"</span>);</div><div class="line">        <span class="keyword">return</span>;</div><div class="line">    &#125;</div><div class="line">    rc = listen(sock, <span class="number">32</span>);</div><div class="line">    <span class="keyword">if</span> (rc &amp;lt; <span class="number">0</span>) <span class="keyword">return</span>;</div><div class="line"></div><div class="line"></div><div class="line">    <span class="keyword">int</span> ep = epoll_create(<span class="number">1</span>);</div><div class="line">    <span class="keyword">struct</span> epoll_event events[<span class="number">32</span>];</div><div class="line">    events[<span class="number">0</span>].data.fd = sock;</div><div class="line">    events[<span class="number">0</span>].events = EPOLLIN | EPOLLET;</div><div class="line">    rc = epoll_ctl(ep, EPOLL_CTL_ADD, sock, &amp;amp;events[<span class="number">0</span>]);</div><div class="line">    <span class="keyword">if</span> (rc &amp;lt; <span class="number">0</span>) <span class="keyword">return</span>;</div><div class="line"></div><div class="line">    rc = epoll_wait(ep, events, <span class="number">32</span>, <span class="number">-1</span>);</div><div class="line">    <span class="keyword">if</span> (rc &amp;lt; <span class="number">0</span>) <span class="keyword">return</span>;</div><div class="line">    <span class="built_in">printf</span>(<span class="string">"epoll_wait: %d\n"</span>, rc);</div><div class="line"></div><div class="line">    <span class="keyword">socklen_t</span> sal = <span class="keyword">sizeof</span>(addr);</div><div class="line">    <span class="keyword">int</span> client = accept(sock, (<span class="keyword">struct</span> sockaddr *)&amp;amp;addr, &amp;amp;sal);</div><div class="line">    <span class="keyword">if</span> (client &amp;lt; <span class="number">0</span>) <span class="keyword">return</span>;</div><div class="line">    <span class="built_in">printf</span>(<span class="string">"accepted: %d\n"</span>, client);</div><div class="line">    events[<span class="number">0</span>].data.fd = client;</div><div class="line">    events[<span class="number">0</span>].events = EPOLLIN | EPOLLET;</div><div class="line">    rc = epoll_ctl(ep, EPOLL_CTL_ADD, client, &amp;amp;events[<span class="number">0</span>]);</div><div class="line">    <span class="keyword">if</span> (rc &amp;lt; <span class="number">0</span>) <span class="keyword">return</span>;</div><div class="line"></div><div class="line">    rc = fork();</div><div class="line">    <span class="keyword">if</span> (rc &amp;lt; <span class="number">0</span>) <span class="keyword">return</span>;</div><div class="line">    <span class="keyword">if</span> (rc == <span class="number">0</span>) &#123;</div><div class="line">        <span class="built_in">printf</span>(<span class="string">"child start\n"</span>);</div><div class="line">        <span class="keyword">for</span> (;;) &#123;</div><div class="line">            sleep(<span class="number">3</span>);</div><div class="line">        &#125;</div><div class="line">        <span class="built_in">printf</span>(<span class="string">"child quit\n"</span>);</div><div class="line">    &#125; <span class="keyword">else</span> &#123;</div><div class="line">        <span class="built_in">printf</span>(<span class="string">"parent start\n"</span>);</div><div class="line"></div><div class="line">        <span class="built_in">memset</span>(events, <span class="number">0</span>, <span class="keyword">sizeof</span>(events));</div><div class="line">        rc = epoll_wait(ep, events, <span class="number">32</span>, <span class="number">-1</span>);</div><div class="line">        <span class="keyword">if</span> (rc &amp;lt; <span class="number">0</span>) &#123;</div><div class="line">            perror(<span class="string">"parent: epoll_wait"</span>);</div><div class="line">            <span class="keyword">return</span>;</div><div class="line">        &#125;</div><div class="line">        <span class="built_in">printf</span>(<span class="string">"parent: epoll1 return %d, fd = %d\n"</span>, rc, events[<span class="number">0</span>].data.fd);</div><div class="line">        <span class="built_in">memset</span>(events, <span class="number">0</span>, <span class="keyword">sizeof</span>(events));</div><div class="line">        <span class="built_in">printf</span>(<span class="string">"close %d\n"</span>, client);</div><div class="line">        epoll_ctl(ep, EPOLL_CTL_DEL, client, &amp;amp;events[<span class="number">0</span>]); <span class="comment">// 注意这一行</span></div><div class="line">        close(client);</div><div class="line"></div><div class="line">        <span class="built_in">memset</span>(events, <span class="number">0</span>, <span class="keyword">sizeof</span>(events));</div><div class="line">        rc = epoll_wait(ep, events, <span class="number">32</span>, <span class="number">-1</span>);</div><div class="line">        <span class="keyword">if</span> (rc &amp;lt; <span class="number">0</span>) &#123;</div><div class="line">            perror(<span class="string">"parent: epoll_wait"</span>);</div><div class="line">            <span class="keyword">return</span>;</div><div class="line">        &#125;</div><div class="line">        <span class="built_in">printf</span>(<span class="string">"parent: epoll2 return %d, fd = %d\n"</span>, rc, events[<span class="number">0</span>].data.fd);</div><div class="line">    &#125;</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">fork_client_routine</span><span class="params">()</span></span></div><div class="line">&#123;</div><div class="line">    <span class="keyword">int</span> sock = socket(AF_INET, SOCK_STREAM, <span class="number">0</span>);</div><div class="line">    <span class="keyword">if</span> (sock &amp;lt; <span class="number">0</span>) <span class="keyword">return</span>;</div><div class="line">    <span class="keyword">struct</span> sockaddr_in addr = &#123;<span class="number">0</span>&#125;;</div><div class="line">    addr.sin_family = PF_INET;</div><div class="line">    addr.sin_port = htons(<span class="number">9999</span>);</div><div class="line">    addr.sin_addr.s_addr = inet_addr(<span class="string">"127.0.0.1"</span>);</div><div class="line">    <span class="keyword">int</span> rc = connect(sock, (<span class="keyword">struct</span> sockaddr *)&amp;amp;addr, <span class="keyword">sizeof</span>(addr));</div><div class="line">    <span class="keyword">if</span> (rc &amp;lt; <span class="number">0</span>) <span class="keyword">return</span>;</div><div class="line">    <span class="keyword">for</span> (;;) &#123;</div><div class="line">        <span class="built_in">printf</span>(<span class="string">"connected, press any\n"</span>);</div><div class="line">        getchar();</div><div class="line">        send(sock, &amp;amp;addr, <span class="number">1</span>, <span class="number">0</span>);</div><div class="line">    &#125;</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">int</span></span></div><div class="line"><span class="title">main</span> <span class="params">(<span class="keyword">int</span> argc, <span class="keyword">char</span> **argv)</span></div><div class="line">&#123;</div><div class="line">    <span class="keyword">if</span> (argc &amp;lt; <span class="number">2</span>) &#123;</div><div class="line">        <span class="built_in">printf</span>(<span class="string">"./t1 c or s\n"</span>);</div><div class="line">        <span class="keyword">return</span> <span class="number">0</span>;</div><div class="line">    &#125;</div><div class="line">    <span class="keyword">if</span> (<span class="string">'c'</span> == argv[<span class="number">1</span>][<span class="number">0</span>]) &#123;</div><div class="line">        fork_client_routine();</div><div class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> (<span class="string">'s'</span> == argv[<span class="number">1</span>][<span class="number">0</span>]) &#123;</div><div class="line">        fork_server_routine();</div><div class="line">    &#125; <span class="keyword">else</span> &#123;</div><div class="line">        <span class="built_in">printf</span>(<span class="string">"./t1 c or s\n"</span>);</div><div class="line">        <span class="keyword">return</span> <span class="number">0</span>;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="keyword">return</span> <span class="number">0</span>;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>当server-parent已经接受1个客户端后，fork出server-child，则server-child对client fd增加了1个引用（实际环境是父进程fork后马上exec，但是该client fd没有指定close-on-exec，所以情况和本测试demo相同）。这时如果server-parent close这个client fd，client进程是不会知道对端已经关闭的，因为在kernel里client fd的引用还没减到0，所以client进程照样可以正常发数据。<br>问题就出在server-parent close这个client fd上：server-parent到底需不需要用EPOLL_CTL_DEL把client fd删除呢？当然close肯定是要调用的。</p>
+<p>下面是Nginx代码截取：<br><a href="http://trac.nginx.org/nginx/browser/nginx/src/event/modules/ngx_epoll_module.c#L441" target="_blank">http://trac.nginx.org/nginx/browser/nginx/src/event/modules/ngx_epoll_module.c#L441</a><br><figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">static</span> ngx_int_t</span></div><div class="line"><span class="title">ngx_epoll_del_event</span><span class="params">(<span class="keyword">ngx_event_t</span> *ev, <span class="keyword">ngx_int_t</span> event, <span class="keyword">ngx_uint_t</span> flags)</span></div><div class="line">&#123;</div><div class="line"> <span class="keyword">int</span> op;</div><div class="line"> <span class="keyword">uint32_t</span> prev;</div><div class="line"> <span class="keyword">ngx_event_t</span> *e;</div><div class="line"> <span class="keyword">ngx_connection_t</span> *c;</div><div class="line"> <span class="keyword">struct</span> epoll_event ee;</div><div class="line"></div><div class="line"> <span class="comment">/*</span></div><div class="line"> * when the file descriptor is closed, the epoll automatically deletes</div><div class="line"> * it from its queue, so we do not need to delete explicitly the event</div><div class="line"> * before the closing the file descriptor</div><div class="line"> */</div><div class="line"></div><div class="line"> <span class="keyword">if</span> (flags &amp; NGX_CLOSE_EVENT) &#123;</div><div class="line">     ev-&gt;active = <span class="number">0</span>;</div><div class="line">     <span class="keyword">return</span> NGX_OK;</div><div class="line"> &#125;</div></pre></td></tr></table></figure></p>
+<p>可以看到nginx作者还专门加了注释说明这个情况，他的意思是：如果flags指明了NGX_CLOSE_EVENT，就不需要再EPOLL_CTL_DEL了，因为epoll会自动从队列中删掉他。<br>而NGX_CLOSE_EVENT就是为了这个功能而设定的：<br><figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line"><span class="comment">/*</span></div><div class="line"> * The event filter is deleted just before the closing file.</div><div class="line"> * Has no meaning for select and poll.</div><div class="line"> * kqueue, epoll, rtsig, eventport: allows to avoid explicit delete,</div><div class="line"> * because filter automatically is deleted</div><div class="line"> * on file close,</div><div class="line"> *</div><div class="line"> * /dev/poll: we need to flush POLLREMOVE event</div><div class="line"> * before closing file.</div><div class="line"> */</div><div class="line"> <span class="meta">#<span class="meta-keyword">define</span> NGX_CLOSE_EVENT 1</span></div></pre></td></tr></table></figure></p>
+<p>那下面就到了调用ngx_epoll_del_event的地方了：<br><a href="http://trac.nginx.org/nginx/browser/nginx/src/core/ngx_connection.c#L911" target="_blank">http://trac.nginx.org/nginx/browser/nginx/src/core/ngx_connection.c#L911</a><br><figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">void</span></span></div><div class="line"><span class="title">ngx_close_connection</span><span class="params">(<span class="keyword">ngx_connection_t</span> *c)</span></div><div class="line">&#123;</div><div class="line"> <span class="keyword">ngx_err_t</span> err;</div><div class="line"> <span class="keyword">ngx_uint_t</span> log_error, level;</div><div class="line"> <span class="keyword">ngx_socket_t</span> fd;</div><div class="line"></div><div class="line"> <span class="keyword">if</span> (c-&gt;fd == (<span class="keyword">ngx_socket_t</span>) <span class="number">-1</span>) &#123;</div><div class="line">     ngx_log_error(NGX_LOG_ALERT, c-&amp;gt;<span class="built_in">log</span>, <span class="number">0</span>, <span class="string">"connection already closed"</span>);</div><div class="line">     <span class="keyword">return</span>;</div><div class="line"> &#125;</div><div class="line"></div><div class="line"> <span class="keyword">if</span> (c-&gt;read-&gt;timer_set) &#123;</div><div class="line">     ngx_del_timer(c-&gt;read);</div><div class="line"> &#125;</div><div class="line"></div><div class="line"> <span class="keyword">if</span> (c-&gt;write-&gt;timer_set) &#123;</div><div class="line">     ngx_del_timer(c-&gt;write);</div><div class="line"> &#125;</div><div class="line"></div><div class="line"> <span class="keyword">if</span> (ngx_del_conn) &#123;</div><div class="line">     ngx_del_conn(c, NGX_CLOSE_EVENT);</div><div class="line"> &#125;</div></pre></td></tr></table></figure></p>
+<p>可以看到flags确实传入了NGX_CLOSE_EVENT，所以现在可以知道了：nginx在close该client fd之前，并没有用EPOLL_CTL_DEL把client fd删除。</p>
+<p>但是如果你用测试demo，把epoll_ctl(ep, EPOLL_CTL_DEL, client…那一行注释掉，你会惊奇的发现当client继续发数据，server-parent最后的那个epoll_wait仍然会把client fd返回到应用层（即epoll惊群问题）:<br>parent: epoll2 return 1, fd = 5<br>为什么呢？因为你没有EPOLL_CTL_DEL，把注释的那行打开就好了。<br>nginx中的epoll_wait如果再一次拿到这个他认为已经关闭的client fd，他就会当做stale event了（通过使用instance变量），然后什么都不做。但是下次epoll_wait还是会把这个client id返回，从而导致CPU占用100%，就不知道为啥了，gdb可以看到epoll_wait返回了EPOLLIN|EPOLLHUP|EPOLLERR，查了下资料：EPOLLHUP是在对端正常关闭时发生，EPOLLERR不知道什么情况下会发生。现在可以猜测只有：server-child在client fd关闭后还在不断得向client fd写数据，从而导致server-parent不断返回错误。</p>
+<p>总结一下：我认为这首先应该不是nginx的bug，因为nginx的worker process不会fork，这样做也省去了一次EPOLL_CTL_DEL调用；如果在自己的项目中worker在运行过程中（而非初始化时）必须要fork&amp;exec，应该将不希望child继承的fd设置close-on-exec，当然这需要很小心且细心的处理。还存在一种情况就是worker在运行过程中只fork不exec，这种情况我认为就应该避免了。<br>另外，在多线程程序中调用fork不是很安全，可以参考的资料：<br>1.<a href="https://blog.kghost.info/2013/04/27/fork-multi-thread/" target="_blank">https://blog.kghost.info/2013/04/27/fork-multi-thread/</a><br>2.<a href="http://blog.codingnow.com/2011/01/fork_multi_thread.html" target="_blank">http://blog.codingnow.com/2011/01/fork_multi_thread.html</a></p>
+<p>2014-11-15补:<br>今天阅读libuv的代码，发现libuv的作者针对这个问题做了EPOLL_CTL_DEL：<br><figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">uv__platform_invalidate_fd</span><span class="params">(<span class="keyword">uv_loop_t</span>* loop, <span class="keyword">int</span> fd)</span> </span>&#123;</div><div class="line">  <span class="keyword">struct</span> uv__epoll_event* events;</div><div class="line">  <span class="keyword">struct</span> uv__epoll_event dummy;</div><div class="line">  <span class="keyword">uintptr_t</span> i;</div><div class="line">  <span class="keyword">uintptr_t</span> nfds;</div><div class="line"></div><div class="line">  assert(loop-&amp;gt;watchers != <span class="literal">NULL</span>);</div><div class="line"></div><div class="line">  events = (<span class="keyword">struct</span> uv__epoll_event*) loop-&amp;gt;watchers[loop-&amp;gt;nwatchers];</div><div class="line">  nfds = (<span class="keyword">uintptr_t</span>) loop-&amp;gt;watchers[loop-&amp;gt;nwatchers + <span class="number">1</span>];</div><div class="line">  <span class="keyword">if</span> (events != <span class="literal">NULL</span>)</div><div class="line">    <span class="comment">/* Invalidate events with same file descriptor */</span></div><div class="line">    <span class="keyword">for</span> (i = <span class="number">0</span>; i &amp;lt; nfds; i++)</div><div class="line">      <span class="keyword">if</span> ((<span class="keyword">int</span>) events[i].data == fd)</div><div class="line">        events[i].data = <span class="number">-1</span>;</div><div class="line"></div><div class="line">  <span class="comment">/* Remove the file descriptor from the epoll.</span></div><div class="line">   * This avoids a problem where the same file description remains open</div><div class="line">   * in another process, causing repeated junk epoll events.</div><div class="line">   *</div><div class="line">   * We pass in a dummy epoll_event, to work around a bug in old kernels.</div><div class="line">   */</div><div class="line">  <span class="keyword">if</span> (loop-&amp;gt;backend_fd &amp;gt;= <span class="number">0</span>)</div><div class="line">    uv__epoll_ctl(loop-&amp;gt;backend_fd, UV__EPOLL_CTL_DEL, fd, &amp;amp;dummy);</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://blog.jiakai.me/2014/11/15/在Nginx的worker进程fork之后/" data-id="ciz53jehq00070ov785piuahn" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2015/05/21/关于Jet的一些想法/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          关于Jet的一些想法
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2014/04/25/三星G7106-ROM制作/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">三星G7106 ROM制作</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+
+  
+    
+
+  
+    
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/02/">February 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/10/">October 2015</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/05/">May 2015</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2014/11/">November 2014</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2014/04/">April 2014</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2014/01/">January 2014</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2017/02/13/hello-world/">Hello World</a>
+          </li>
+        
+          <li>
+            <a href="/2015/10/18/这几天看的几部电影/">这几天看的几部电影</a>
+          </li>
+        
+          <li>
+            <a href="/2015/05/21/关于Jet的一些想法/">关于Jet的一些想法</a>
+          </li>
+        
+          <li>
+            <a href="/2014/11/15/在Nginx的worker进程fork之后/">在Nginx的worker进程fork之后</a>
+          </li>
+        
+          <li>
+            <a href="/2014/04/25/三星G7106-ROM制作/">三星G7106 ROM制作</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2017 JiaKai<br>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+<script src="/js/script.js"></script>
+
+  </div>
+</body>
+</html>

@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>关于WebRTC | JiaKai&#39;s Blog</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="这两天闲来无事，从前天开始就看起了WebRTC。以前boss说要让我搞一个P2P穿透的库出来，因为对libjingle了解一点，知道他完整地实现了ICE，而且是Google做的，所以就从这个入手了。结果几天下来，是云里雾里啊。C++中的那些各种继承，各种指针，各种类，哎妈，不说了。不过通过读官方文档，还是了解了一些概念，也感觉设计的挺不错的，记忆尤深的就是传输数据时他会动态切换速度最快的candi">
+<meta property="og:type" content="article">
+<meta property="og:title" content="关于WebRTC">
+<meta property="og:url" content="http://blog.jiakai.me/2014/01/18/关于WebRTC/index.html">
+<meta property="og:site_name" content="JiaKai's Blog">
+<meta property="og:description" content="这两天闲来无事，从前天开始就看起了WebRTC。以前boss说要让我搞一个P2P穿透的库出来，因为对libjingle了解一点，知道他完整地实现了ICE，而且是Google做的，所以就从这个入手了。结果几天下来，是云里雾里啊。C++中的那些各种继承，各种指针，各种类，哎妈，不说了。不过通过读官方文档，还是了解了一些概念，也感觉设计的挺不错的，记忆尤深的就是传输数据时他会动态切换速度最快的candi">
+<meta property="og:updated_time" content="2017-02-14T05:27:33.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="关于WebRTC">
+<meta name="twitter:description" content="这两天闲来无事，从前天开始就看起了WebRTC。以前boss说要让我搞一个P2P穿透的库出来，因为对libjingle了解一点，知道他完整地实现了ICE，而且是Google做的，所以就从这个入手了。结果几天下来，是云里雾里啊。C++中的那些各种继承，各种指针，各种类，哎妈，不说了。不过通过读官方文档，还是了解了一些概念，也感觉设计的挺不错的，记忆尤深的就是传输数据时他会动态切换速度最快的candi">
+  
+    <link rel="alternate" href="/atom.xml" title="JiaKai&#39;s Blog" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  <link rel="stylesheet" href="/css/style.css">
+  
+
+</head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">JiaKai&#39;s Blog</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" results="0" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://blog.jiakai.me"></form>
+      </div>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-关于WebRTC" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2014/01/18/关于WebRTC/" class="article-date">
+  <time datetime="2014-01-18T09:52:30.000Z" itemprop="datePublished">2014-01-18</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      关于WebRTC
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>这两天闲来无事，从前天开始就看起了WebRTC。<br>以前boss说要让我搞一个P2P穿透的库出来，因为对libjingle了解一点，知道他完整地实现了ICE，而且是Google做的，所以就从这个入手了。结果几天下来，是云里雾里啊。C++中的那些各种继承，各种指针，各种类，哎妈，不说了。不过通过读官方文档，还是了解了一些概念，也感觉设计的挺不错的，记忆尤深的就是传输数据时他会动态切换速度最快的candidate。可最后还是放弃了，代码太难读懂了，也许是我历练的少吧。<br>直到遇到了libnice，才知道什么是简洁。可是libnice只有ICE，考虑到以后很可能要和媒体数据传输相结合，于是选择了pjsip，一个设计良好，跨N多平台，小巧简练的库，我把他里面的pjnath子库封装了一下，就算交了差。<br>这两天查到说WebRTC是要朝着集成到浏览器中的目的去的，而且已经被chrome，firefox和opera支持了，说已经有数十亿设备支持等等。就看了一下，发现大部分代码就是重用libjingle的，然后定义了一套对外统一的接口，有js的，HTML5的和native API。libjingle已经不单独维护了，SVN的log里记录，大概2013年8月就停止更新了，最后一条写着“has been moved to WebRTC”。<br>checkout和build就废了我好大的劲，幸亏以前弄过libjingle，工具都装过，具体步骤就不写了，能搜到的，但需要注意的是最新的webRTC在Windows上已经不支持vs2008及以前的版本了，因此我又装了个vs2013 express，但又没有ATL和MFC的库，MFC无所谓，但webRTC包含了altbase.h等头文件，所以直接指向vs2008的ATL对应目录即可。这样应该就没什么问题了。<br>一上来当然是run一下example，找了找，正好有个peerconnectionclient和peerconnectionserver，试了下，有几次直接崩溃，但是还是能运行的，比较严重的问题是在我的笔记本上运行3分钟左右会卡死，简单瞅了一下，应该是一个关键段死锁了。<br>这咋用，bug懒得改了，还是去看看以前搞的libjingle吧，看看能不能用。试了下，还真能用，没什么大问题，运行挺稳定，唯一缺点就是太耗CPU，50%被他占去了（我用pjmedia搞的对讲模块，平均占用CPU 8%）。看了下client的代码，采集用DirectShow，显示用的是GDI。但我看到他的代码库中有video render模块，而且支持好几个平台，Windows下是用的Direct3D9，于是尝试用D3D实现显示。<br>又看了一大堆类的代码，然后写了点代码，到最后发现对接的时候一个表示一帧I420数据的类竟然有2个实现！分别是在webrtc命名空间和cricket命名空间里，一个叫VideoFrame，一个叫I420VideoFrame，哎，懒得转了，直接构造一个空I420VideoFrame丢给了renderer最后给了D3D，粉色图像最后还是出来了，先这样吧。估计我也不会用它。<br>目前看来WebRTC还是很不成熟的，文档太少，而且个人感觉太乱，可能是有历史包袱的原因吧。优化可能还不够，我也看到Google已经针对SSE优化过libvpx了，但是还是会占这么多CPU。而且我不明白为什么要针对一帧420数据实现2个类！（这俩类的功能还都挺全的，也就是说挺复杂的，也就是说代码挺多的！呃，我不喜欢这么多的高耦合代码）</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://blog.jiakai.me/2014/01/18/关于WebRTC/" data-id="ciz53jeh400020ov7kdi51hyp" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2014/01/27/基于pjmedia的音视频对讲（二）/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          基于pjmedia的音视频对讲（二）
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2014/01/12/基于pjmedia的音视频对讲（一）/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">基于pjmedia的音视频对讲（一）</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+
+  
+    
+
+  
+    
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/02/">February 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/10/">October 2015</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/05/">May 2015</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2014/11/">November 2014</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2014/04/">April 2014</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2014/01/">January 2014</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2017/02/13/hello-world/">Hello World</a>
+          </li>
+        
+          <li>
+            <a href="/2015/10/18/这几天看的几部电影/">这几天看的几部电影</a>
+          </li>
+        
+          <li>
+            <a href="/2015/05/21/关于Jet的一些想法/">关于Jet的一些想法</a>
+          </li>
+        
+          <li>
+            <a href="/2014/11/15/在Nginx的worker进程fork之后/">在Nginx的worker进程fork之后</a>
+          </li>
+        
+          <li>
+            <a href="/2014/04/25/三星G7106-ROM制作/">三星G7106 ROM制作</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2017 JiaKai<br>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+<script src="/js/script.js"></script>
+
+  </div>
+</body>
+</html>

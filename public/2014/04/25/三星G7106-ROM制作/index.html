@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>三星G7106 ROM制作 | JiaKai&#39;s Blog</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="首先声明一下我的所有操作都是在Ubuntu下进行的。
+首先你得有个官方ROM。（我下的是G7106ZNUANB3_G7106CHUANB3_CHU.zip）提取出system.img.ext4，并挂载到ubuntu中的某个目录；
+删除自带的apk（在app目录），我删除的有：116114_MS01_V4.0.apk DioDict3B Kies.odex QQInterceptService.ap">
+<meta property="og:type" content="article">
+<meta property="og:title" content="三星G7106 ROM制作">
+<meta property="og:url" content="http://blog.jiakai.me/2014/04/25/三星G7106-ROM制作/index.html">
+<meta property="og:site_name" content="JiaKai's Blog">
+<meta property="og:description" content="首先声明一下我的所有操作都是在Ubuntu下进行的。
+首先你得有个官方ROM。（我下的是G7106ZNUANB3_G7106CHUANB3_CHU.zip）提取出system.img.ext4，并挂载到ubuntu中的某个目录；
+删除自带的apk（在app目录），我删除的有：116114_MS01_V4.0.apk DioDict3B Kies.odex QQInterceptService.ap">
+<meta property="og:updated_time" content="2017-02-14T05:49:23.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="三星G7106 ROM制作">
+<meta name="twitter:description" content="首先声明一下我的所有操作都是在Ubuntu下进行的。
+首先你得有个官方ROM。（我下的是G7106ZNUANB3_G7106CHUANB3_CHU.zip）提取出system.img.ext4，并挂载到ubuntu中的某个目录；
+删除自带的apk（在app目录），我删除的有：116114_MS01_V4.0.apk DioDict3B Kies.odex QQInterceptService.ap">
+  
+    <link rel="alternate" href="/atom.xml" title="JiaKai&#39;s Blog" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  <link rel="stylesheet" href="/css/style.css">
+  
+
+</head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">JiaKai&#39;s Blog</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" results="0" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://blog.jiakai.me"></form>
+      </div>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-三星G7106-ROM制作" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2014/04/25/三星G7106-ROM制作/" class="article-date">
+  <time datetime="2014-04-25T01:43:10.000Z" itemprop="datePublished">2014-04-25</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      三星G7106 ROM制作
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>首先声明一下我的所有操作都是在Ubuntu下进行的。</p>
+<p>首先你得有个官方ROM。（我下的是G7106ZNUANB3_G7106CHUANB3_CHU.zip）<br>提取出system.img.ext4，并挂载到ubuntu中的某个目录；</p>
+<p>删除自带的apk（在app目录），我删除的有：<br>116114_MS01_V4.0.apk DioDict3B Kies.odex QQInterceptService.apk SinaStockPhone2013.apk<br>BaiduMap_V5.0.apk DioDict3_for_Android_Phone_Samsung_Chn.apk Netease.apk QQInterceptUpdate.apk WeChat_V5.0.apk<br>BaiduNetdisk.apk Flipboard_V2.0.apk NetworkLocation_Baidu.apk QQ_V2013.apk WoPortal_MS01_V1.0.apk<br>ChatON_feature.apk GroupPlay_25.apk PolarisViewer5.apk Sinamicroblog_V3.0.apk WoStore_MS01_V3.0.apk<br>DaoDao_Stub.apk Kies.apk QQBrowser_V4.0.apk SinaNewsPhone2013.apk YellowPage.apk</p>
+<p>安装Google Play：<br>先下载gapps-jb-20130813-signed.zip</p>
+<p>root：<br>由于Android 4.3版本的内核启用了SELinux，所以之前的root方法不再适用了。<br>以前的方法：自己写一个su，直接调用setuid(0)和setgid(0)，并把该su属性改成rwsr-sr-x。<br>现在的方法（即Supersu的方法）：用一个有root权限的进程启动daemonsu，用户调用su时，会和已启动的daemonsu进程通信，把需要执行的命令发给daemonsu，让daemonsu来执行。<br>具体步骤是：<br>下载最新版本的Supersu.apk，用7z打开，提取出assets目录中的supersu.arm.png，并将supersu.arm.png改名为su；<br>将su放到xbin目录，打开etc/init.qcom.post_boot.sh，在最后添加一行：/system/xbin/daemonsu –auto-daemon &amp;<br>将Supersu.apk放到app目录<br>然后按着这个配置xbin目录：<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">root@ubuntu:/mnt/loop/xbin<span class="comment"># ll</span></div><div class="line">total 180</div><div class="line">drwxr-xr-x. 2 root 2000 4096 Apr 4 16:08 ./</div><div class="line">drwxr-xr-x. 19 root root 4096 Apr 4 13:13 ../</div><div class="line">lrwxrwxrwx 1 root root 2 Apr 4 16:08 daemonsu -&amp;gt; su*</div><div class="line">-rwxr-xr-x. 1 root 2000 59748 Feb 14 12:37 dexdump*</div><div class="line">-rwsr-sr-x. 1 root root 113036 Apr 4 16:05 su*</div></pre></td></tr></table></figure></p>
+<p>最后我写了个脚本重新打包system.img.ext4：<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">DST_DIR=/mnt/hgfs/g7106/G7106ZNUANB3_G7106CHUANB3_CHU/G7106ZNUANB3_G7106CHUANB3_G7106ZNUANB3_HOME</div><div class="line">DST_FILE=system.img.ext4</div><div class="line"><span class="comment">#rm -f $DST_DIR/$DST_FILE</span></div><div class="line">./make_ext4fs <span class="_">-s</span> <span class="_">-l</span> 1500M <span class="_">-a</span> system <span class="variable">$DST_DIR</span>/<span class="variable">$DST_FILE</span> /mnt/loop</div><div class="line"><span class="built_in">cd</span> <span class="variable">$DST_DIR</span> &amp;amp;&amp;amp; tar -cf system.tar <span class="variable">$DST_FILE</span></div></pre></td></tr></table></figure></p>
+<p>下面就可以用odin将system.tar刷进去了，选PDA那个就好了，只刷系统目录。</p>
+<p>刷进去后，可以再更新一下官方的更新文件：点关于设备中的系统更新。<br>我更新过后，基带版本是G7106ZNUANC1，内部版本号是JLS36C.G7106ZNUANB3</p>
+<p>这个是我做的ROM：<a title="http://pan.baidu.com/s/1kT4vKuN" href="http://pan.baidu.com/s/1kT4vKuN" target="_blank">http://pan.baidu.com/s/1kT4vKuN</a></p>
+<p>有问题，或不明白的地方，或对我的ROM有反馈建议/意见，请在下面留言，谢谢。</p>
+<p>&nbsp;</p>
+<p>说明：</p>
+<p>1.Kies.odex, Kies.apk,  NetworkLocation_Baidu.apk还是别删了吧，不然会有问题；</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://blog.jiakai.me/2014/04/25/三星G7106-ROM制作/" data-id="ciz53jehn00060ov7s1g3mdpx" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2014/11/15/在Nginx的worker进程fork之后/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          在Nginx的worker进程fork之后
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2014/04/15/《丰田栽了的原因》总结/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">《丰田栽了的原因》总结</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+
+  
+    
+
+  
+    
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/02/">February 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/10/">October 2015</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/05/">May 2015</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2014/11/">November 2014</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2014/04/">April 2014</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2014/01/">January 2014</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2017/02/13/hello-world/">Hello World</a>
+          </li>
+        
+          <li>
+            <a href="/2015/10/18/这几天看的几部电影/">这几天看的几部电影</a>
+          </li>
+        
+          <li>
+            <a href="/2015/05/21/关于Jet的一些想法/">关于Jet的一些想法</a>
+          </li>
+        
+          <li>
+            <a href="/2014/11/15/在Nginx的worker进程fork之后/">在Nginx的worker进程fork之后</a>
+          </li>
+        
+          <li>
+            <a href="/2014/04/25/三星G7106-ROM制作/">三星G7106 ROM制作</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2017 JiaKai<br>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+<script src="/js/script.js"></script>
+
+  </div>
+</body>
+</html>

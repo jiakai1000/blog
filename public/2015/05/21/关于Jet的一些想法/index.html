@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>关于Jet的一些想法 | JiaKai&#39;s Blog</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="来到快网之后一直在搞流媒体，在以前的公司也是大部分时间搞音视频，看来这很可能就是我的路吧，是时候沉下心来，踏踏实实做点东西了。再加上新公司给提供的环境还可以，周围有一些牛人，不算太忙的节奏，还有主要就是在这可以深度学习挖掘一些东西，而不是像以前那样绝大部分时间都是在实现业务逻辑。
+在公司做的产品就是流媒体CDN服务器。要求很简单：稳定，性能。其实互联网行业要求支持的协议不是太多，初期对性能也没什么">
+<meta property="og:type" content="article">
+<meta property="og:title" content="关于Jet的一些想法">
+<meta property="og:url" content="http://blog.jiakai.me/2015/05/21/关于Jet的一些想法/index.html">
+<meta property="og:site_name" content="JiaKai's Blog">
+<meta property="og:description" content="来到快网之后一直在搞流媒体，在以前的公司也是大部分时间搞音视频，看来这很可能就是我的路吧，是时候沉下心来，踏踏实实做点东西了。再加上新公司给提供的环境还可以，周围有一些牛人，不算太忙的节奏，还有主要就是在这可以深度学习挖掘一些东西，而不是像以前那样绝大部分时间都是在实现业务逻辑。
+在公司做的产品就是流媒体CDN服务器。要求很简单：稳定，性能。其实互联网行业要求支持的协议不是太多，初期对性能也没什么">
+<meta property="og:updated_time" content="2017-02-14T05:28:42.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="关于Jet的一些想法">
+<meta name="twitter:description" content="来到快网之后一直在搞流媒体，在以前的公司也是大部分时间搞音视频，看来这很可能就是我的路吧，是时候沉下心来，踏踏实实做点东西了。再加上新公司给提供的环境还可以，周围有一些牛人，不算太忙的节奏，还有主要就是在这可以深度学习挖掘一些东西，而不是像以前那样绝大部分时间都是在实现业务逻辑。
+在公司做的产品就是流媒体CDN服务器。要求很简单：稳定，性能。其实互联网行业要求支持的协议不是太多，初期对性能也没什么">
+  
+    <link rel="alternate" href="/atom.xml" title="JiaKai&#39;s Blog" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  <link rel="stylesheet" href="/css/style.css">
+  
+
+</head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">JiaKai&#39;s Blog</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" results="0" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://blog.jiakai.me"></form>
+      </div>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-关于Jet的一些想法" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2015/05/21/关于Jet的一些想法/" class="article-date">
+  <time datetime="2015-05-20T16:59:56.000Z" itemprop="datePublished">2015-05-21</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      关于Jet的一些想法
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>来到快网之后一直在搞流媒体，在以前的公司也是大部分时间搞音视频，看来这很可能就是我的路吧，是时候沉下心来，踏踏实实做点东西了。再加上新公司给提供的环境还可以，周围有一些牛人，不算太忙的节奏，还有主要就是在这可以深度学习挖掘一些东西，而不是像以前那样绝大部分时间都是在实现业务逻辑。</p>
+<p>在公司做的产品就是流媒体CDN服务器。要求很简单：稳定，性能。其实互联网行业要求支持的协议不是太多，初期对性能也没什么要求，难点还是在稳定性和快速实现客户业务需求上。刚到公司时，我被分配的任务是和另外4个同事实现RTMP协议的直播转发。不知道为什么，明明知道以后肯定要支持多种协议之间的互相转换，可项目还是被拆成了2个，分2拨人去搞。我认为当初的这个决定肯定会导致以后的合并会把项目搞的越来越乱，现在看来还是有这个趋势的，不再多表。</p>
+<p>随着公司项目的进展，我也逐渐了解了这个行业，了解了许多相关的商业的、开源的产品或项目，了解了客户的需求以及未来可能会有的需求，于是脑海中一个自己设计的项目渐渐清晰开来。我的计划是实现一个流媒体框架，类似Gstreamer，VLC那样的，可以通过插件轻松扩展。客户可以基于这个框架快速实现服务器或客户端。首先如何让客户做到快速实现？我认为这是最重要的，客户需要做的其实只有实现他自己的业务逻辑，其他一切都不需要关心：性能，流媒体协议，编解码，缓存等等。这个实现必须具有很低的学习成本，因此开发语言就很重要了，C/C++肯定不是最好的，拿它们来写业务纯粹是自虐，我的想法是给客户提供多种语言，如Lua，JavaScript等。Lua的特点是很小的footprint，高性能首选，嵌入式必选，所以它适合各种应用场景：服务器，嵌入式（智能手机，智能硬件，工控设备）都是很完美的。JavaScript则是针对很多人有很小的学习成本，看Node.JS和Github就知道了。以后可能还会考虑Java，因为Java是企业大中型项目的首选，而且wowza就提供了Java的API，所以可能会考虑支持，而我们的引擎因为是C写的，因此又会比wowza有一些性能优势。除了选择一门合适的语言，生态也是很重要的，因此我计划Lua的API参考openresty来设计，尽量做到完全兼容（应该无法做到完全兼容，区别还是很大的），JavaScript的API完全按照Node.JS设计，确保Node.js的模块可以直接运行在我的引擎上，使用了libuv的C++模块可能会兼容不了，不过这种模块应该也不是很多。</p>
+<p>框架的实现，我计划基于coroutine来做，因为用coroutine写非阻塞IO实在是酸爽，直接甩callback几条街。还有就是看看Go，Rust就知道了。state thread这个库是我从SRS中得知的，很不错的一个库，该做的他基本都做了，不该做的他也没多做。而且有SRS这个很棒的项目一直在用，我就不用担心坑了。st没有实现异步文件IO，没有支持Windows IOCP，这些都是我以后需要添加的。异步文件IO可以按libuv那种方式设计。</p>
+<p>框架的设计，我选择了Gstreamer，因为我认为这个框架设计的不错（虽然实现的有点不是那么追求完美），层次分明，官方积累了很多插件，基本全方位覆盖音视频各种协议和编解码，还有就是以前搞TI的Davinci的时候，官方只提供了Gstreamer的插件，所以感觉这个适用面更广一些，用户基数更大一些。虽然后来随着对Gstreamer越来越熟悉就越感觉好多地方写得不是很好（毕竟它只是被拿来做客户端的，不需要考虑太多），但是我还是认为架构设计的很不错。Gstreamer的作者说他是参照DirectShow来设计的，我也认可这一点，而且更坚定了我选择它的决心。微软下一代的多媒体框架是Media Foundation，我也会参考进来。</p>
+<p>整个框架全部纯C开发，使用GObject实现OO，以及完成和业务层开发语言的对接。需要深度优化Gstreamer，话说看到那些lock/unlock我就很无语，而且还那么多！这方面Nginx是个典范，幸好在公司做项目对Nginx还算一般熟。网络IO肯定是使用各OS上性能最高的API：epoll，kqueue，IOCP。多线程架构，线程间使用MQ通信，需要参考ZeroMQ基于st写一套MQ库。集群的支持也可以使用这个MQ，可以参考的有云风的skynet。硬件支持计划的有x86,x64,ARM，以后可能会考虑NPU。OS支持肯定会有3大主流OS，以后可能会考虑支持一些RTOS如VxWorks，TI-RTOS等。</p>
+<p>业务层开发语言。Lua本身支持coroutine，但是不能在C中yield，所以采用了Lua 5.1.5，打了luajit coco的补丁，然后仿照openresty，添加了可以统一调度的thread API，Lua的coroutine因为是非对称coroutine，所以无法用于非阻塞IO，只能用新加的thread API。我说的无法用的意思是openresty里的那种用法：同步方式写但是异步方式执行。JavaScript的话需要让st实现回调触发的功能，同时也要支持Lua的那种写法：同步写异步执行，可以参考的有孢子响马开源的fibjs项目，但是我的可以直接利用Node.js的生态。</p>
+<p>应用场景想了好多好多，例如软交换，互联网行业流媒体服务器，客户端播放器，客户端播放插件，安防行业信令/转发等服务器，互联网流媒体SaaS提供商，HTPC，电视盒子等等，当然其中有很多甚至全部是不怎么靠谱的，但是当有一天我把框架做出来了，也许应用自然就有了，总之现在的当务之急就是先把它做出来。</p>
+<p>代码会开源托管在<a href="https://github.com/Jet-Streaming" target="_blank">Github</a>，使用travis-ci做build和unit test，目前还是在heavy develop，代码还没提交，欢迎follow和star。代码提交首个版本后应该会做一个简单的页面放在Github Pages上。</p>
+<p>关于开源，因为核心是基于GStreamer的，GStreamer遵循LGPL协议，因此整个核心也只能是LGPL协议并开源，但是插件是使用动态链接的方式，因此可以避开开源的问题。开源对该项目肯定是利大于弊的，产品的价值最终还是要体现在业务和服务上，我做的只是给大家提供一个高质量的二次开发的平台而已，当然这个大家也包括我自己。</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://blog.jiakai.me/2015/05/21/关于Jet的一些想法/" data-id="ciz53jehc00040ov7uns59a3c" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2015/10/18/这几天看的几部电影/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          这几天看的几部电影
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2014/11/15/在Nginx的worker进程fork之后/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">在Nginx的worker进程fork之后</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+
+  
+    
+
+  
+    
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/02/">February 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/10/">October 2015</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/05/">May 2015</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2014/11/">November 2014</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2014/04/">April 2014</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2014/01/">January 2014</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2017/02/13/hello-world/">Hello World</a>
+          </li>
+        
+          <li>
+            <a href="/2015/10/18/这几天看的几部电影/">这几天看的几部电影</a>
+          </li>
+        
+          <li>
+            <a href="/2015/05/21/关于Jet的一些想法/">关于Jet的一些想法</a>
+          </li>
+        
+          <li>
+            <a href="/2014/11/15/在Nginx的worker进程fork之后/">在Nginx的worker进程fork之后</a>
+          </li>
+        
+          <li>
+            <a href="/2014/04/25/三星G7106-ROM制作/">三星G7106 ROM制作</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2017 JiaKai<br>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+<script src="/js/script.js"></script>
+
+  </div>
+</body>
+</html>
